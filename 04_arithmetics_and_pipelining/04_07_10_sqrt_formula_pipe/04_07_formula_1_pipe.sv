@@ -41,5 +41,63 @@ module formula_1_pipe
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.ru/fsm
 
+    logic res_sqrt1_vld;
+    logic res_sqrt2_vld;
+    logic res_sqrt3_vld;
+    logic res_all_sqrt_vld;
+
+    logic [15:0] res_sqrt1;
+    logic [15:0] res_sqrt2;
+    logic [15:0] res_sqrt3; 
+    logic [31:0] res_sum;
+
+    isqrt sqrt1
+    (
+        .clk   ( clk           ),
+        .rst   ( rst           ),
+
+        .x_vld ( arg_vld       ),
+        .x     ( a             ),
+
+        .y_vld ( res_sqrt1_vld ),
+        .y     ( res_sqrt1     )
+    );
+
+    isqrt sqrt2
+    (
+        .clk   ( clk           ),
+        .rst   ( rst           ),
+
+        .x_vld ( arg_vld       ),
+        .x     ( b             ),
+
+        .y_vld ( res_sqrt2_vld ),
+        .y     ( res_sqrt2     )
+    );
+
+    isqrt sqrt3
+    (
+        .clk   ( clk           ),
+        .rst   ( rst           ),
+
+        .x_vld ( arg_vld       ),
+        .x     ( c             ),
+
+        .y_vld ( res_sqrt3_vld ),
+        .y     ( res_sqrt3     )
+    );
+
+    always_ff @ (posedge clk or posedge rst)
+        if (rst)
+            res_all_sqrt_vld <= '0;
+        else
+            res_all_sqrt_vld <= res_sqrt1_vld & res_sqrt2_vld & res_sqrt3_vld;
+
+    always_ff @ (posedge clk)
+        if (res_sqrt1_vld & res_sqrt2_vld & res_sqrt3_vld)
+            res_sum <= res_sqrt1 + res_sqrt2 + res_sqrt3;
+
+    assign res_vld = res_all_sqrt_vld;
+    assign res     = res_sum;
 
 endmodule

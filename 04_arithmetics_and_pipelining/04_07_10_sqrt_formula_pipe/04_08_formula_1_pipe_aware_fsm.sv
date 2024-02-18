@@ -60,5 +60,93 @@ module formula_1_pipe_aware_fsm
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.ru/fsm
 
+    typedef enum logic [2:0] 
+    { 
+        IDLE        = 3'b000,
+        WRITE_B     = 3'b001,
+        WRITE_C     = 3'b010,
+        WAIT        = 3'b011,
+        READ_SQRT_B = 3'b100,
+        READ_SQRT_C = 3'b101
+    } state_e;
+
+    state_e state, next_state;
+
+    //------------------------------------------------------------------------
+    // Next state and isqrt interface
+
+    always_comb
+    begin
+        next_state  = state;
+
+        isqrt_x_vld = '0;
+
+        case (state)
+        IDLE:
+        begin
+            isqrt_x = a;
+
+            if (arg_vld)
+            begin
+                isqrt_x_vld = '1;
+                next_state  = WRITE_B;
+            end
+        end
+
+        WRITE_B:
+        begin
+            isqrt_x     = b;
+            isqrt_x_vld = '1;
+            next_state  = WRITE_C;
+        end
+
+        WRITE_C:
+        begin
+            isqrt_x     = c;
+            isqrt_x_vld = '1;
+            next_state  = WAIT;
+        end
+
+        WAIT:
+        begin
+            if (isqrt_y_vld)
+                next_state = READ_SQRT_B;
+        end
+
+        READ_SQRT_B:
+        begin
+            next_state = READ_SQRT_C;
+        end
+
+        READ_SQRT_C:
+        begin
+            next_state = IDLE;
+        end
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Assigning next state
+
+    always_ff @ (posedge clk or posedge rst)
+        if (rst)
+            state <= IDLE;
+        else
+            state <= next_state;
+
+    //------------------------------------------------------------------------
+    // Accumulating the result
+
+    always_ff @ (posedge clk or posedge rst)
+        if (rst)
+            res_vld <= '0;
+        else
+            res_vld <= (state == READ_SQRT_C);
+
+    always_ff @ (posedge clk)
+        if (state == IDLE)
+            res <= '0;
+        else if (isqrt_y_vld)
+            res <= res + isqrt_y;
 
 endmodule

@@ -34,8 +34,11 @@ module signed_add_with_overflow
   // when the sum (either positive or negative)
   // of two input arguments does not fit into 4 bits.
   // Otherwise the 'overflow' should be set to 0.
-
-
+  
+  assign sum = a + b;
+  assign overflow = ( ~a[3] & ~b[3] &  sum[3]) | 
+                    (  a[3] &  b[3] & ~sum[3]);
+  
 endmodule
 
 //----------------------------------------------------------------------------

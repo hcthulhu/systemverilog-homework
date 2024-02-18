@@ -35,6 +35,17 @@ module signed_add_with_saturation
   // and the arguments are negative,
   // the sum should be set to the minimum negative number.
 
+  logic [3:0] sum_wo_overflow;
+  logic overflow_pos;
+  logic overflow_neg;
+
+  always_comb begin 
+    sum_wo_overflow = a + b;
+    overflow_pos = ~a[3] & ~b[3] &  sum_wo_overflow[3];
+    overflow_neg = a[3]  &  b[3] & ~sum_wo_overflow[3];
+  end
+
+  assign sum = overflow_pos ? 4'b0111 : (overflow_neg ? 4'b1000 : sum_wo_overflow);
 
 endmodule
 
