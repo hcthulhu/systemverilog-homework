@@ -44,10 +44,10 @@ module a_plus_b_using_fifos_and_double_buffer
 
     // Task: Add logic using the template below
     //
-    // assign a_ready           = ...
-    //
-    // assign a_fifo_push       = ...
-    // assign a_fifo_write_data = ...
+    assign a_ready           = ~a_fifo_full;
+    
+    assign a_fifo_push       = a_valid & ~a_fifo_full;
+    assign a_fifo_write_data = a_data;
 
 
     //------------------------------------------------------------------------
@@ -75,22 +75,22 @@ module a_plus_b_using_fifos_and_double_buffer
 
     // Task: Add logic using the template below
     //
-    // assign b_ready           = ...
-    //
-    // assign b_fifo_push       = ...
-    // assign b_fifo_write_data = ...
+    assign b_ready           = ~b_fifo_full;
+    
+    assign b_fifo_push       = b_valid & ~b_fifo_full;
+    assign b_fifo_write_data = b_data;
 
 
     //------------------------------------------------------------------------
 
     // Task: Add logic using the template below
     //
-    // wire               sum_up_valid = ...
-    // wire               sum_up_ready;
-    // wire [width - 1:0] sum_up_data  = ...
-    //
-    // assign a_fifo_pop = ...
-    // assign b_fifo_pop = ...
+    wire               sum_up_valid = ~a_fifo_empty & ~b_fifo_empty;
+    wire               sum_up_ready;
+    wire [width - 1:0] sum_up_data  = a_fifo_read_data + b_fifo_read_data;
+    
+    assign a_fifo_pop = sum_up_valid & sum_up_ready;
+    assign b_fifo_pop = sum_up_valid & sum_up_ready;
 
 
     //------------------------------------------------------------------------
